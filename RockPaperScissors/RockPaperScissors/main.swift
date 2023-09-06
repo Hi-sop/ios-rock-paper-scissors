@@ -33,7 +33,7 @@ func startGame(winner: Winner) {
 
     switch userChoice {
     case "1", "2", "3":
-        startGame(winner: decidePrintMessage(userChoice: userChoice, winner: winner))
+        startGame(winner: decideTurn(userChoice: userChoice, winner: winner))
     case "0":
         print("게임 종료")
         return
@@ -43,7 +43,7 @@ func startGame(winner: Winner) {
     }
 }
 
-func decidePrintMessage(userChoice: String, winner: Winner) -> Winner {
+func decideTurn(userChoice: String, winner: Winner) -> Winner {
     let winPrint: String = "이겼습니다."
     let losePrint: String = "졌습니다."
     
@@ -96,7 +96,7 @@ func playSecondGame(turn: Winner) {
 
     switch userChoice {
     case "1", "2", "3":
-        playSecondGame(turn: decidePrintMessage(userChoice: userChoice, winner: turn))
+        playSecondGame(turn: decideTurn(userChoice: userChoice, winner: turn))
     case "0":
         print("게임 종료")
         return
