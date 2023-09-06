@@ -2,124 +2,108 @@
 //  RockPaperScissors - main.swift
 //  Created by yagom. 
 //  Copyright © yagom academy. All rights reserved.
-// 
-
-enum Choice: String {
-    case scissors = "1"
-    case rock = "2"
-    case paper = "3"
-}
+//
 
 enum Winner: String {
     case user = "사용자"
     case computer = "컴퓨터"
+    case none
 }
 
-@discardableResult
-func startGame(continueRecursive: Bool) -> Bool {
-    guard continueRecursive else {
-    return false
+//enum RockPaperScissors: String {
+//    case scissors = "1"
+//    case rock = "2"
+//    case paper = "3"
+//}
+
+//@discardableResult
+func startGame(winner: Winner) {
+    guard winner == .none else {
+        playSecondGame(turn: winner)
+        return
     }
 
     print("가위(1), 바위(2), 보(3)! <종료 : 0> : ", terminator: "")
 
     guard let userChoice = readLine() else {
         print("잘못된 입력입니다. 다시 시도해주세요.")
-        return startGame(continueRecursive: true)
+        startGame(winner: .none)
+        return
     }
 
     switch userChoice {
     case "1", "2", "3":
-        startGame(continueRecursive: compareWithComputer(userChoice: userChoice))
+        startGame(winner: decidePrintMessage(userChoice: userChoice, winner: winner))
     case "0":
         print("게임 종료")
-        break
+        return
     default:
-        startGame(continueRecursive: true)
+        print("잘못된 입력입니다. 다시 시도해주세요.")
+        startGame(winner: .none)
     }
-
-    return false
-
 }
 
-func compareWithComputer(userChoice: String) -> Bool {
-    let computerNumber: String = String(Int.random(in: 1...3))
-
-    guard let computerChoice: Choice = Choice(rawValue: computerNumber),
-          let userChoice: Choice = Choice(rawValue: userChoice) else {
-        return true
+func decidePrintMessage(userChoice: String, winner: Winner) -> Winner {
+    let winPrint: String = "이겼습니다."
+    let losePrint: String = "졌습니다."
+    
+    switch winner {
+    case .none:
+        let drawPrint: String = "비겼습니다."
+        let victory: Winner = decideVictory(userChoice: userChoice, drawPrint: drawPrint, firstPrint: losePrint, secondPrint: winPrint)
+        return victory
+    case .user, .computer:
+        let drawPrint: String = "\(winner.rawValue)의 승리!"
+        let victory: Winner = decideVictory(userChoice: userChoice, drawPrint: drawPrint, firstPrint: winPrint, secondPrint: losePrint)
+        return victory
     }
+}
 
+func decideVictory(userChoice: String, drawPrint: String, firstPrint: String, secondPrint: String) -> Winner {
+    let computerChoice: String = String(Int.random(in: 1...3))
+    
+    print(computerChoice)
+    
     guard computerChoice != userChoice else {
-        print("비겼습니다!")
-        return true
+        print(drawPrint)
+        return .none
     }
 
-    guard (computerChoice == .scissors && userChoice == .paper) ||
-            (computerChoice == .rock && userChoice == .scissors) ||
-            (computerChoice == .paper && userChoice == .rock) else {
-        print("이겼습니다!")
-        return playSecondGame(continueRecursive: true, turn: .user)
+    guard (computerChoice == "1" && userChoice == "2") ||
+            (computerChoice == "2" && userChoice == "3") ||
+            (computerChoice == "3" && userChoice == "1") else {
+        print(firstPrint)
+        return firstPrint == "이겼습니다." ? .user : .computer
     }
 
-    print("졌습니다!")
-    return playSecondGame(continueRecursive: true, turn: .computer)
-
+    print(secondPrint)
+    return secondPrint == "이겼습니다." ? .user: .computer
 }
 
-@discardableResult
-func playSecondGame(continueRecursive: Bool, turn: Winner) -> Bool{
-    guard continueRecursive else {
-    return false
+//@discardableResult
+func playSecondGame(turn: Winner) {
+    guard turn != .none else {
+        return
     }
 
     print("[\(turn.rawValue) 턴] 묵(1), 찌(2), 빠(3)! <종료 : 0> : ", terminator: "")
 
     guard let userChoice = readLine() else {
         print("잘못된 입력입니다. 다시 시도해주세요.")
-        return playSecondGame(continueRecursive: true, turn: .computer)
+        playSecondGame(turn: .computer)
+        return
     }
 
     switch userChoice {
     case "1", "2", "3":
-        let (bool,winner) = winOrLose(userChoice: userChoice, turn: turn)
-        playSecondGame(continueRecursive: bool, turn: winner)
+        playSecondGame(turn: decidePrintMessage(userChoice: userChoice, winner: turn))
     case "0":
         print("게임 종료")
-        break
+        return
     default:
-        playSecondGame(continueRecursive: true, turn: .computer)
+        print("잘못된 입력입니다. 다시 시도해주세요.")
+        playSecondGame(turn: .computer)
     }
-
-    return false
 }
 
-func winOrLose(userChoice: String, turn: Winner) -> (Bool, Winner) {
-    let computerNumber: String = String(Int.random(in: 1...3))
-
-    guard let computerChoice: Choice = Choice(rawValue: computerNumber),
-          let userChoice: Choice = Choice(rawValue: userChoice) else {
-        return (true, .computer)
-    }
-
-    guard computerChoice != userChoice else {
-        print("""
-        같은 패입니다.
-        \(turn.rawValue)의 승리!
-        """)
-        return (false, turn)
-    }
-
-    guard (computerChoice == .scissors && userChoice == .paper) ||
-            (computerChoice == .rock && userChoice == .scissors) ||
-            (computerChoice == .paper && userChoice == .rock) else {
-        print("이겼습니다!")
-        return (true, .user)
-    }
-
-    print("졌습니다!")
-    return (true, .computer)
-
-}
-
-startGame(continueRecursive: true)
+startGame(winner: .none)
