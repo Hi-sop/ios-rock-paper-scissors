@@ -4,75 +4,118 @@
 //  Copyright © yagom academy. All rights reserved.
 // 
 
+enum PrintOptions {
+    case roundStart
+    case roundWin
+    case draw
+    case gameWin
+    case gameEnd
+    case invalidInput
+}
+
 enum Winner: String {
     case user = "사용자"
     case computer = "컴퓨터"
 }
 
-enum RockPaperScissors: String, CaseIterable {
+enum RockPaperScissors: CaseIterable {
     case rock
     case paper
     case scissors
 }
 
 func playRockPaperScissorsGame() {
-    print("가위(1), 바위(2), 보(3)! <종료 : 0> : ", terminator: "")
+    displayRoundOneResult(printOption: .roundStart)
     
     let userInput = readLine()
     
     guard userInput != "0" else {
-        print("게임 종료")
+        displayRoundOneResult(printOption: .gameEnd)
         return
     }
     
     guard let userChoice = mappingUserChoice(userInput: userInput, round: 1) else {
-        print("잘못된 입력입니다. 다시 시도해주세요.")
+        displayRoundOneResult(printOption: .invalidInput)
         playRockPaperScissorsGame()
         return
     }
     
     guard let winner = decideVictory(userChoice: userChoice) else {
-        print("비겼습니다!")
+        displayRoundOneResult(printOption: .draw)
         playRockPaperScissorsGame()
         return
     }
+    displayRoundOneResult(printOption: .roundWin, winner: winner)
     
-    if winner == .user {
-        print("이겼습니다!")
-    } else {
-        print("졌습니다!")
-    }
     playMukchippaGame(winner: winner)
+}
+
+func displayRoundOneResult(printOption: PrintOptions, winner: Winner? = nil) {
+    switch printOption {
+    case .roundStart:
+        print("가위(1), 바위(2), 보(3)! <종료 : 0> : ", terminator: "")
+        return
+    case .roundWin:
+        if winner == .user {
+            print("이겼습니다!")
+        } else {
+            print("졌습니다!")
+        }
+    case .draw:
+        print("비겼습니다!")
+    case .invalidInput:
+        print("잘못된 입력입니다. 다시 시도해주세요.")
+    case .gameEnd:
+        print("게임 종료")
+    default:
+        break
+    }
 }
 
 func playMukchippaGame(winner: Winner?) {
     guard let turn = winner else {
         return
     }
-    print("[\(turn.rawValue) 턴] 묵(1), 찌(2), 빠(3)! <종료 : 0> : ", terminator: "")
-
+    displayRoundTwoResult(printOption: .roundStart, winner: turn)
+    
     let userInput = readLine()
     
     guard userInput != "0" else {
-        print("게임 종료")
+        displayRoundTwoResult(printOption: .gameEnd, winner: turn)
         return
     }
     
     guard let userChoice = mappingUserChoice(userInput: userInput, round: 2) else {
-        print("잘못된 입력입니다. 다시 시도해주세요.")
+        displayRoundTwoResult(printOption: .invalidInput, winner: turn)
         playMukchippaGame(winner: .computer)
         return
     }
     
-    guard let winner = decideVictory(userChoice: userChoice) else {
-        print("\(turn.rawValue)의 승리!")
+    guard let roundWinner = decideVictory(userChoice: userChoice) else {
+        displayRoundTwoResult(printOption: .gameWin, winner: turn)
         return
     }
-    print("\(winner.rawValue)의 턴입니다.")
+    displayRoundTwoResult(printOption: .roundWin, winner: roundWinner)
     
-    playMukchippaGame(winner: winner)
+    playMukchippaGame(winner: roundWinner)
 }
 
+func displayRoundTwoResult(printOption: PrintOptions, winner: Winner) {
+    switch printOption {
+    case .roundStart:
+        print("[\(winner.rawValue) 턴] 묵(1), 찌(2), 빠(3)! <종료 : 0> : ", terminator: "")
+    case .roundWin:
+        print("\(winner.rawValue)의 턴입니다.")
+    case .gameWin:
+        print("\(winner.rawValue)의 승리!")
+    case .invalidInput:
+        print("잘못된 입력입니다. 다시 시도해주세요.")
+    case .gameEnd:
+        print("게임 종료")
+    default:
+        break
+    }
+}
 
 func mappingUserChoice(userInput: String?, round: Int) -> RockPaperScissors?  {
     if round == 1 {
