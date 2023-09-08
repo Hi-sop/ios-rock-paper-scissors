@@ -16,6 +16,7 @@ enum PrintOptions {
 enum Winner: String {
     case user = "사용자"
     case computer = "컴퓨터"
+    case none
 }
 
 enum RockPaperScissors: CaseIterable {
@@ -25,32 +26,32 @@ enum RockPaperScissors: CaseIterable {
 }
 
 func playRockPaperScissorsGame() {
-    displayRoundOneResult(printOption: .roundStart)
+    displayRockPaperScissorsGame(printOption: .roundStart, winner: .none)
     
     let userInput = readLine()
     
     guard userInput != "0" else {
-        displayRoundOneResult(printOption: .gameEnd)
+        displayRockPaperScissorsGame(printOption: .gameEnd, winner: .none)
         return
     }
     
     guard let userChoice = mappingUserChoice(userInput: userInput, round: 1) else {
-        displayRoundOneResult(printOption: .invalidInput)
+        displayRockPaperScissorsGame(printOption: .invalidInput, winner: .none)
         playRockPaperScissorsGame()
         return
     }
     
     guard let winner = decideVictory(userChoice: userChoice) else {
-        displayRoundOneResult(printOption: .draw)
+        displayRockPaperScissorsGame(printOption: .draw, winner: .none)
         playRockPaperScissorsGame()
         return
     }
-    displayRoundOneResult(printOption: .roundWin, winner: winner)
     
+    displayRockPaperScissorsGame(printOption: .roundWin, winner: winner)
     playMukchippaGame(winner: winner)
 }
 
-func displayRoundOneResult(printOption: PrintOptions, winner: Winner? = nil) {
+func displayRockPaperScissorsGame(printOption: PrintOptions, winner: Winner) {
     switch printOption {
     case .roundStart:
         print("가위(1), 바위(2), 보(3)! <종료 : 0> : ", terminator: "")
@@ -72,35 +73,32 @@ func displayRoundOneResult(printOption: PrintOptions, winner: Winner? = nil) {
     }
 }
 
-func playMukchippaGame(winner: Winner?) {
-    guard let turn = winner else {
-        return
-    }
-    displayRoundTwoResult(printOption: .roundStart, winner: turn)
+func playMukchippaGame(winner: Winner) {
+    displayMukchippaGame(printOption: .roundStart, winner: winner)
     
     let userInput = readLine()
     
     guard userInput != "0" else {
-        displayRoundTwoResult(printOption: .gameEnd, winner: turn)
+        displayMukchippaGame(printOption: .gameEnd, winner: .none)
         return
     }
     
     guard let userChoice = mappingUserChoice(userInput: userInput, round: 2) else {
-        displayRoundTwoResult(printOption: .invalidInput, winner: turn)
+        displayMukchippaGame(printOption: .invalidInput, winner: .none)
         playMukchippaGame(winner: .computer)
         return
     }
     
     guard let roundWinner = decideVictory(userChoice: userChoice) else {
-        displayRoundTwoResult(printOption: .gameWin, winner: turn)
+        displayMukchippaGame(printOption: .gameWin, winner: winner)
         return
     }
-    displayRoundTwoResult(printOption: .roundWin, winner: roundWinner)
     
+    displayMukchippaGame(printOption: .roundWin, winner: roundWinner)
     playMukchippaGame(winner: roundWinner)
 }
 
-func displayRoundTwoResult(printOption: PrintOptions, winner: Winner) {
+func displayMukchippaGame(printOption: PrintOptions, winner: Winner) {
     switch printOption {
     case .roundStart:
         print("[\(winner.rawValue) 턴] 묵(1), 찌(2), 빠(3)! <종료 : 0> : ", terminator: "")
