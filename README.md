@@ -137,9 +137,10 @@ func mappingUserChoice(userInput: String?, round: Int) -> RockPaperScissors?  {
 
 #### 3. 이전 게임의 승자를 구분하는 방법
 - 묵찌빠의 최종 승자를 결정하기 위해서는 이전 가위바위보 결과에 따른 승자를 구분할 필요가 있었습니다.
-- 묵찌빠게임을 호출할 때 inout변수를 전달하여 이 값을 승자에 따라 변경해주어 구분할 수 있게 했습니다.
+- 이전 코드에서는 묵찌빠게임을 호출할 때 inout변수를 전달하여 이 값을 승자에 따라 변경해주어 구분할 수 있게 했습니다.
+- 이를 winner에는 이전 승자가 담기고 roundWinner에는 새로운 승자가 할당되어, roundWinner가 .none(비겼을 때)일 때 'winner의 승리'가 출력되도록 변경하였습니다.
 
-
+**이전 코드**
 ``` swift
 func playRockPaperScissorsGame(progress: GameProgress) {
     guard progress != .userWin, progress != .computerWin else {
@@ -159,15 +160,60 @@ func playMukchippaGame(progress: GameProgress, turn: inout GameProgress) {
         displayResult(progress: progress, turn: turn)
         return
     }
-    
-    if progress == .userWin || progress == .computerWin {
-        turn = progress
-    }
-    
-    displayResult(progress: progress, turn: turn)
-    
+  
 // (코드생략)       
     
+}
+```
+
+**수정 코드**
+```swift
+func playMukchippaGame(winner: Winner) {
+
+// (생략)
+    
+    let roundWinner = decideVictory(userChoice: userChoice)
+    
+    guard roundWinner != .none else {
+        displayMukchippaGame(printOption: .gameWin, winner: winner)
+        return
+    }
+    
+    displayMukchippaGame(printOption: .roundWin, winner: roundWinner)
+    playMukchippaGame(winner: roundWinner)
+}
+
+func decideVictory(userChoice: RockPaperScissors) -> Winner {
+    let computerChoice = RockPaperScissors.allCases.randomElement()
+    
+    guard computerChoice != userChoice else {
+        return .none
+    }
+    
+    guard (computerChoice == .scissors && userChoice == .paper) ||
+            (computerChoice == .rock && userChoice == .scissors) ||
+            (computerChoice == .paper && userChoice == .rock) else {
+        return .user
+    }
+    
+    return .computer
+}
+
+func displayMukchippaGame(printOption: PrintOptions, winner: Winner) {
+    switch printOption {
+    case .roundStart:
+        print("[\(winner.rawValue) 턴] 묵(1), 찌(2), 빠(3)! <종료 : 0> : ", terminator: "")
+    case .roundWin:
+        print("\(winner.rawValue)의 턴입니다.")
+    case .gameWin:
+        print("\(winner.rawValue)의 승리!")
+    case .invalidInput:
+        print("잘못된 입력입니다. 다시 시도해주세요.")
+    case .gameEnd:
+        print("게임 종료")
+    default:
+        break
+    }
 }
 ```
 
